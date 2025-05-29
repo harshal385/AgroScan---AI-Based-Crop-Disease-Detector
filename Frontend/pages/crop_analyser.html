@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroScan - Crop Disease Diagnosis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/chatbot.css">
+  <link rel="stylesheet" href="../css/crop-analysis.css">
+  <script src="../js/utils/config.js"></script>
+  <script src="../js/chatbot.js" defer></script>
+  <script src="../js/crop-analysis.js" defer></script>
+  <style>
+    :root {
+      --primary-green: #00c851;
+      --secondary-green: #00ff41;
+      --dark-green: #00a142;
+      --accent-orange: #ff6b35;
+      --accent-red: #ff4757;
+      --bg-dark: #0a0f0a;
+      --bg-light: #f8fff8;
+      --text-light: #ffffff;
+      --text-dark: #1a1a1a;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --success-color: #00c851;
+      --warning-color: #ffa726;
+      --error-color: #ff4757;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      min-height: 100vh;
+    }
+
+    /* Animated background particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: var(--primary-green);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+      50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(10, 15, 10, 0.95);
+      backdrop-filter: blur(30px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 15px 0;
+      z-index: 1000;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 5px var(--primary-green)); }
+      to { filter: drop-shadow(0 0 20px var(--primary-green)); }
+    }
+
+    .back-btn {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      color: var(--text-light);
+      padding: 10px 20px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn:hover {
+      background: rgba(0, 200, 81, 0.2);
+      transform: translateX(-5px);
+    }
+
+    /* Main content */
+    .main-content {
+      padding: 120px 20px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+
+    .page-title {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .page-title h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text-light), var(--primary-green), var(--secondary-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      animation: slideInDown 0.8s ease-out;
+    }
+
+    .page-title p {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      max-width: 600px;
+      margin: 0 auto;
+      animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+
+    /* Upload section */
+    .upload-section {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+      animation: slideInUp 0.8s ease-out 0.4s both;
+    }
+
+    .upload-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .upload-section:hover::before {
+      opacity: 0.05;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--glass-border);
+      border-radius: 16px;
+      padding: 60px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 2;
+    }
+
+    .upload-area.dragover {
+      border-color: var(--primary-green);
+      background: rgba(0, 200, 81, 0.1);
+      transform: scale(1.02);
+    }
+
+    .upload-area:hover {
+      border-color: var(--primary-green);
+      background: rgba(0, 200, 81, 0.05);
+    }
+
+    .upload-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      display: block;
+      opacity: 0.7;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    .upload-text {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--primary-green);
+    }
+
+    .upload-subtext {
+      font-size: 1rem;
+      opacity: 0.7;
+      margin-bottom: 30px;
+    }
+
+    .upload-btn {
+      background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+      border: none;
+      padding: 15px 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-light);
+      border-radius: 25px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(0, 200, 81, 0.3);
+    }
+
+    .upload-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.7s ease;
+    }
+
+    .upload-btn:hover::before {
+      left: 100%;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(0, 200, 81, 0.5);
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    /* Image preview */
+    .image-preview {
+      display: none;
+      margin-top: 30px;
+      text-align: center;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .preview-container {
+      position: relative;
+      display: inline-block;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .preview-image {
+      max-width: 400px;
+      max-height: 300px;
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .preview-image:hover {
+      transform: scale(1.05);
+    }
+
+    .remove-image {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 71, 87, 0.9);
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+
+    .remove-image:hover {
+      background: var(--error-color);
+      transform: scale(1.1);
+    }
+
+    .analyze-btn {
+      background: linear-gradient(135deg, var(--accent-orange), #ff8f65);
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-light);
+      border-radius: 25px;
+      cursor: pointer;
+      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+    }
+
+    .analyze-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(255, 107, 53, 0.5);
+    }
+
+    .analyze-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Loading state */
+    .loading-state {
+      display: none;
+      text-align: center;
+      padding: 40px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 3px solid var(--glass-border);
+      border-top: 3px solid var(--primary-green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Animations */
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 100px 15px 40px;
+      }
+      
+      .upload-section,
+      .results-section {
+        padding: 25px;
+      }
+      
+      .upload-area {
+        padding: 40px 15px;
+      }
+      
+      .upload-icon {
+        font-size: 3rem;
+      }
+      
+      .disease-info {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .preview-image {
+        max-width: 100%;
+      }
+    }
+
+    /* Chatbot styles (backup in case external CSS fails to load) */
+    #chatbot {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      font-family: 'Inter', sans-serif;
+    }
+
+    #chatbotButton {
+      background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+      color: var(--text-light);
+      border: none;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 28px;
+      box-shadow: 0 4px 20px rgba(0, 200, 81, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      animation: pulse 2s infinite;
+    }
+
+    #chatWindow {
+      position: absolute;
+      bottom: 85px;
+      right: 0;
+      width: 380px;
+      height: 600px;
+      background: linear-gradient(145deg, rgba(10, 15, 10, 0.95), rgba(15, 25, 15, 0.98));
+      border: 1px solid rgba(0, 200, 81, 0.2);
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: bottom right;
+      overflow: hidden;
+    }
+
+    #chatWindow.hidden {
+      transform: scale(0.95) translateY(20px);
+      opacity: 0;
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated background particles -->
+  <div class="particles" id="particles"></div>
+
+  <header>
+    <div class="header-content">
+      <div class="logo">AgroScan</div>
+      <a href="#" class="back-btn" onclick="goBack()">
+        <span>←</span> Back to Home
+      </a>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="page-title">
+      <h1>Crop Disease Diagnosis</h1>
+      <p>Upload an image of your crop to get instant AI-powered disease detection and treatment recommendations</p>
+    </div>
+
+    <section class="upload-section">
+      <div class="upload-area" id="uploadArea">
+        <span class="upload-icon">📷</span>
+        <div class="upload-text">Drop your crop image here</div>
+        <div class="upload-subtext">or click to browse and select from your device</div>
+        <button class="upload-btn">Choose Image</button>
+        <input type="file" id="fileInput" accept="image/*">
+      </div>
+      
+      <div class="image-preview" id="imagePreview">
+        <div class="preview-container">
+          <img id="previewImage" class="preview-image" alt="Crop preview">
+          <button class="remove-image" id="removeImageBtn" title="Remove image">×</button>
+        </div>
+        <button class="analyze-btn" id="analyzeBtn">
+          🔍 Analyze Crop
+        </button>
+      </div>
+    </section>
+
+    <section class="loading-state" id="loadingState">
+      <div class="loading-spinner"></div>
+      <h3>Analyzing your crop image...</h3>
+      <p>Our AI is examining the image for disease patterns</p>
+    </section>
+
+  </main>
+
+  <!-- Chatbot -->
+  <div id="chatbot">
+    <button id="chatbotButton">🤖</button>
+    <div id="chatWindow" class="hidden">
+      <div id="chatHeader">
+        <span>AgroScan Assistant</span>
+        <button id="closeChat">×</button>
+      </div>
+      <div id="chatContent">
+        <div class="bot-message">Hello! I'm your AI farming assistant. How can I help you with crop disease diagnosis today? 🌱</div>
+      </div>
+      <div id="chatInputArea">
+        <input type="text" id="chatInput" placeholder="Type your message here..." />
+        <button id="sendMessage">Send</button>
+        <div id="typingIndicator" class="hidden">AI is thinking...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Navigation function
+    function goBack() {
+      if (confirm('Are you sure you want to go back? Any unsaved analysis will be lost.')) {
+        window.history.back();
+      }
+    }
+
+    // Create animated particles
+    document.addEventListener('DOMContentLoaded', () => {
+      // Create particles
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 50;
+
+      if (particlesContainer) {
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = Math.random() * 100 + '%';
+          particle.style.top = Math.random() * 100 + '%';
+          particle.style.animationDelay = Math.random() * 6 + 's';
+          particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+          particlesContainer.appendChild(particle);
+        }
+      }
+    });
+
+    // Chatbot class (backup in case external JS fails to load)
+    class ChatBot {
+      constructor() {
+        // Get API key from config
+        this.apiKey = window.agroConfig?.apiKeys?.openRouter || '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';
+        this.model = window.agroConfig?.aiModels?.chatbot || 'mistralai/mistral-7b-instruct';
+        this.apiEndpoint = window.agroConfig?.apiEndpoints?.chatbot || 'https://openrouter.ai/api/v1/chat/completions';
+        this.messageHistory = [];
+        this.isProcessing = false;
+      }
+
+      setupEventListeners() {
+        console.log('Setting up chatbot event listeners...'); // Debug log
+        const chatbotButton = document.getElementById('chatbotButton');
+        const closeChat = document.getElementById('closeChat');
+        const sendMessage = document.getElementById('sendMessage');
+        const chatInput = document.getElementById('chatInput');
+
+        if (!chatbotButton || !closeChat || !sendMessage || !chatInput) {
+          console.error('Some chat elements not found!');
+          return;
+        }
+
+        chatbotButton.onclick = () => {
+          console.log('Chat button clicked'); // Debug log
+          const chatWindow = document.getElementById('chatWindow');
+          chatWindow.classList.toggle('hidden');
+        };
+
+        closeChat.onclick = () => {
+          console.log('Close button clicked'); // Debug log
+          const chatWindow = document.getElementById('chatWindow');
+          chatWindow.classList.add('hidden');
+        };
+
+        sendMessage.onclick = () => this.handleSendMessage();
+
+        chatInput.onkeypress = (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            this.handleSendMessage();
+          }
+        };
+      }
+
+      async handleSendMessage() {
+        if (this.isProcessing) return;
+
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+        const typingIndicator = document.getElementById('typingIndicator');
+        
+        if (message === '') return;
+
+        this.addMessageToChat('user', message);
+        chatInput.value = '';
+
+        this.isProcessing = true;
+        typingIndicator.classList.remove('hidden');
+        typingIndicator.classList.add('visible');
+
+        try {
+          const response = await this.getAIResponse(message);
+          this.addMessageToChat('bot', response);
+        } catch (error) {
+          console.error('Error getting AI response:', error);
+          this.addMessageToChat('bot', 'I apologize, but I encountered an error. Please try again.');
+        }
+
+        typingIndicator.classList.remove('visible');
+        setTimeout(() => {
+          typingIndicator.classList.add('hidden');
+        }, 300);
+        this.isProcessing = false;
+      }
+
+      addMessageToChat(sender, message) {
+        const chatContent = document.getElementById('chatContent');
+        const messageElement = document.createElement('div');
+        messageElement.textContent = message;
+        messageElement.className = sender === 'user' ? 'user-message' : 'bot-message';
+        chatContent.appendChild(messageElement);
+        chatContent.scrollTop = chatContent.scrollHeight;
+
+        this.messageHistory.push({
+          role: sender === 'user' ? 'user' : 'assistant',
+          content: message
+        });
+      }
+
+      async getAIResponse(message) {
+        try {
+          const response = await fetch(this.apiEndpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.apiKey}`,
+              'HTTP-Referer': window.location.href,
+              'X-Title': 'AgroScan Assistant'
+            },
+            body: JSON.stringify({
+              model: this.model,
+              messages: [
+                {
+                  role: 'system',
+                  content: 'You are an AI farming assistant for AgroScan, specifically focused on helping with crop disease diagnosis. You help farmers identify crop diseases, provide treatment recommendations, and offer general agricultural advice. Be concise, helpful, and friendly.'
+                },
+                ...this.messageHistory,
+                {
+                  role: 'user',
+                  content: message
+                }
+              ]
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to get AI response');
+          }
+
+          const data = await response.json();
+          return data.choices[0].message.content;
+        } catch (error) {
+          console.error('API Error:', error);
+          throw error;
+        }
+      }
+    }
+  </script>
+</body>
+</html>

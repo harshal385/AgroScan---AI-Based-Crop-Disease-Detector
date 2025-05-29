@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crop Yield Prediction - AgroScan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <link rel="stylesheet" href="../css/chatbot.css">
+  <script src="../js/chatbot.js" defer></script>
+  <style>
+    :root {
+      --primary-green: #00c851;
+      --secondary-green: #00ff41;
+      --dark-green: #00a142;
+      --accent-orange: #ff6b35;
+      --bg-dark: #0a0f0a;
+      --bg-light: #f8fff8;
+      --text-light: #ffffff;
+      --text-dark: #1a1a1a;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --error-color: #ff4757;
+      --success-color: #2ed573;
+      --warning-color: #ffa502;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      line-height: 1.6;
+    }
+
+    /* Enhanced animated background */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: var(--primary-green);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .particle.large {
+      width: 4px;
+      height: 4px;
+      background: var(--secondary-green);
+      animation: floatReverse 8s ease-in-out infinite;
+    }
+
+    .particle.pulse {
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+      50% { transform: translateY(-30px) rotate(180deg); opacity: 0.8; }
+    }
+
+    @keyframes floatReverse {
+      0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); opacity: 0.2; }
+      50% { transform: translateY(40px) rotate(-180deg) scale(1.5); opacity: 0.6; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(2); opacity: 0.1; }
+    }
+
+    /* Animated gradient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(0, 200, 81, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 107, 53, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(0, 255, 65, 0.05) 0%, transparent 50%);
+      animation: gradientShift 20s ease-in-out infinite;
+      z-index: -2;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { 
+        background: 
+          radial-gradient(circle at 20% 80%, rgba(0, 200, 81, 0.15) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(255, 107, 53, 0.1) 0%, transparent 50%);
+      }
+      50% { 
+        background: 
+          radial-gradient(circle at 80% 20%, rgba(0, 200, 81, 0.2) 0%, transparent 50%),
+          radial-gradient(circle at 20% 80%, rgba(255, 107, 53, 0.15) 0%, transparent 50%);
+      }
+    }
+
+    /* Enhanced header with glassmorphism */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(10, 15, 10, 0.85);
+      backdrop-filter: blur(25px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 15px 0;
+      z-index: 1000;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateY(0);
+    }
+
+    header.scrolled {
+      background: rgba(10, 15, 10, 0.95);
+      backdrop-filter: blur(35px);
+      border-bottom: 1px solid rgba(0, 200, 81, 0.3);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: logoGlow 3s ease-in-out infinite alternate;
+      text-decoration: none;
+      position: relative;
+    }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+      filter: blur(20px);
+      opacity: 0;
+      z-index: -1;
+      transition: opacity 0.3s ease;
+    }
+
+    .logo:hover::after {
+      opacity: 0.3;
+    }
+
+    @keyframes logoGlow {
+      from { 
+        filter: drop-shadow(0 0 5px var(--primary-green));
+        transform: scale(1);
+      }
+      to { 
+        filter: drop-shadow(0 0 25px var(--primary-green));
+        transform: scale(1.02);
+      }
+    }
+
+    .back-btn {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      color: var(--text-light);
+      padding: 10px 20px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .back-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 200, 81, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .back-btn:hover::before {
+      left: 100%;
+    }
+
+    .back-btn:hover {
+      background: rgba(0, 200, 81, 0.2);
+      transform: translateX(-8px) scale(1.05);
+      box-shadow: 0 10px 30px rgba(0, 200, 81, 0.4);
+    }
+
+    /* Main content with enhanced animations */
+    .main-content {
+      padding-top: 100px;
+      min-height: 100vh;
+    }
+
+    .hero-section {
+      padding: 60px 20px;
+      text-align: center;
+      background: 
+        radial-gradient(circle at 30% 70%, rgba(0, 200, 81, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 70% 30%, rgba(255, 107, 53, 0.15) 0%, transparent 50%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        conic-gradient(from 0deg, transparent, rgba(0, 200, 81, 0.1), transparent, rgba(255, 107, 53, 0.05), transparent);
+      animation: rotate 30s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .hero-section h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--text-light), var(--primary-green), var(--secondary-green));
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: slideInUp 1s ease-out, textShimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes textShimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .hero-section p {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      max-width: 700px;
+      margin: 0 auto;
+      opacity: 0;
+      animation: slideInUp 1s ease-out 0.3s both, fadeInScale 1.5s ease-out 0.5s both;
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 0.9;
+        transform: scale(1);
+      }
+    }
+
+    /* Enhanced container animations */
+    .prediction-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 60px 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    /* Enhanced prediction form */
+    .prediction-form {
+      background: var(--glass-bg);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      padding: 40px;
+      border-radius: 24px;
+      animation: slideInLeft 1s cubic-bezier(0.4, 0, 0.2, 1) 0.6s both;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .prediction-form:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 60px rgba(0, 200, 81, 0.2);
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-100px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    .prediction-form::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-green), var(--secondary-green), var(--accent-orange), var(--primary-green));
+      background-size: 300% 100%;
+      animation: shimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { background-position: 300% 0; }
+      50% { background-position: -100% 0; }
+    }
+
+    .prediction-form h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 30px;
+      color: var(--text-light);
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      animation: slideInUp 0.8s ease-out 1s both;
+    }
+
+    .form-section {
+      margin-bottom: 30px;
+      opacity: 0;
+      animation: slideInUp 0.6s ease-out both;
+    }
+
+    .form-section:nth-child(2) { animation-delay: 1.2s; }
+    .form-section:nth-child(3) { animation-delay: 1.4s; }
+    .form-section:nth-child(4) { animation-delay: 1.6s; }
+
+    .form-section h3 {
+      color: var(--primary-green);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--glass-border);
+      position: relative;
+    }
+
+    .form-section h3::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--primary-green);
+      animation: expandWidth 2s ease-out 2s both;
+    }
+
+    @keyframes expandWidth {
+      to { width: 100%; }
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-light);
+      opacity: 0.9;
+      transition: all 0.3s ease;
+    }
+
+    .required::after {
+      content: ' *';
+      color: var(--error-color);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 15px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-light);
+      font-size: 1rem;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary-green);
+      box-shadow: 0 0 30px rgba(0, 200, 81, 0.4);
+      background: rgba(255, 255, 255, 0.08);
+      transform: scale(1.02);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .location-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .gps-btn {
+      background: rgba(0, 200, 81, 0.2);
+      border: 1px solid var(--primary-green);
+      color: var(--primary-green);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gps-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(0, 200, 81, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.4s ease;
+    }
+
+    .gps-btn:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+
+    .gps-btn:hover {
+      background: rgba(0, 200, 81, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 200, 81, 0.3);
+    }
+
+    .weather-info {
+      background: rgba(0, 200, 81, 0.1);
+      border: 1px solid var(--primary-green);
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .weather-info.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .weather-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .weather-item {
+      text-align: center;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .weather-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-3px);
+    }
+
+    .weather-item .label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+
+    .weather-item .value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary-green);
+      animation: numberCount 1s ease-out;
+    }
+
+    @keyframes numberCount {
+      from { opacity: 0; transform: scale(0.5); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .predict-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+      border: none;
+      padding: 18px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-light);
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 10px 30px rgba(0, 200, 81, 0.4);
+      margin-top: 20px;
+      opacity: 0;
+      animation: slideInUp 0.8s ease-out 2s both;
+    }
+
+    .predict-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: left 0.7s ease;
+    }
+
+    .predict-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: all 0.6s ease;
+    }
+
+    .predict-btn:hover::before {
+      left: 100%;
+    }
+
+    .predict-btn:hover::after {
+      width: 300px;
+      height: 300px;
+    }
+
+    .predict-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 20px 50px rgba(0, 200, 81, 0.6);
+    }
+
+    .predict-btn:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .predict-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Enhanced results section */
+    .results-section {
+      background: var(--glass-bg);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      padding: 40px;
+      border-radius: 24px;
+      animation: slideInRight 1s cubic-bezier(0.4, 0, 0.2, 1) 0.9s both;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .results-section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 60px rgba(255, 107, 53, 0.2);
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(100px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    .results-section h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 30px;
+      color: var(--text-light);
+      opacity: 0;
+      animation: slideInUp 0.8s ease-out 1.5s both;
+    }
+
+    .prediction-card {
+      background: rgba(0, 200, 81, 0.1);
+      border: 1px solid var(--primary-green);
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 25px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      animation: scaleIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 2s both;
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.8) rotateY(90deg);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) rotateY(0deg);
+      }
+    }
+
+    .prediction-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 200, 81, 0.3), transparent);
+      transition: left 0.8s ease;
+    }
+
+    .prediction-card:hover::before {
+      left: 100%;
+    }
+
+    .prediction-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(0, 200, 81, 0.4);
+    }
+
+    .yield-value {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--primary-green);
+      margin-bottom: 10px;
+      text-shadow: 0 0 25px rgba(0, 200, 81, 0.6);
+      animation: bounceIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) 2.5s both;
+    }
+
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(-180deg);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.05) rotate(-10deg);
+      }
+      70% {
+        transform: scale(0.9) rotate(5deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    .yield-unit {
+      font-size: 1.1rem;
+      opacity: 0.8;
+      margin-bottom: 15px;
+      animation: fadeIn 1s ease-out 3s both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 0.8; }
+    }
+
+    .confidence-range {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      animation: slideInUp 0.8s ease-out 3.2s both;
+    }
+
+    .chart-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 25px;
+      height: 300px;
+      opacity: 0;
+      animation: slideInUp 0.8s ease-out 3.5s both;
+      transition: all 0.3s ease;
+    }
+
+    .chart-container:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: scale(1.02);
+    }
+
+    .suggestions-card {
+      background: rgba(255, 107, 53, 0.1);
+      border: 1px solid var(--accent-orange);
+      border-radius: 16px;
+      padding: 25px;
+      opacity: 0;
+      animation: slideInUp 0.8s ease-out 4s both;
+      transition: all 0.3s ease;
+    }
+
+    .suggestions-card:hover {
+      background: rgba(255, 107, 53, 0.15);
+      transform: translateY(-3px);
+    }
+
+    .suggestions-card h3 {
+      color: var(--accent-orange);
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .suggestion-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 3px solid var(--accent-orange);
+      transition: all 0.3s ease;
+      opacity: 0;
+      animation: slideInLeft 0.6s ease-out both;
+    }
+
+    .suggestion-item:nth-child(2) { animation-delay: 4.2s; }
+    .suggestion-item:nth-child(3) { animation-delay: 4.4s; }
+    .suggestion-item:nth-child(4) { animation-delay: 4.6s; }
+
+    .suggestion-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(10px);
+      border-left-width: 5px;
+    }
+
+    .suggestion-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .suggestion-title {
+      font-weight: 600;
+      color: var(--accent-orange);
+      margin-bottom: 5px;
+    }
+
+    .suggestion-desc {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    /* Enhanced loading states */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .loading.active {
+      display: block;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--glass-border);
+      border-top: 4px solid var(--primary-green);
+      border-right: 4px solid var(--secondary-green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite, pulse 2s ease-in-out infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Enhanced message styles */
+    .message {
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-weight: 500;
+      display: none;
+      animation: slideInDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .message::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      animation: messageShimmer 2s ease-in-out;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes messageShimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .message.success {
+      background: rgba(46, 213, 115, 0.2);
+      border: 1px solid var(--success-color);
+      color: var(--success-color);
+      box-shadow: 0 5px 20px rgba(46, 213, 115, 0.3);
+    }
+
+    .message.error {
+      background: rgba(255, 71, 87, 0.2);
+      border: 1px solid var(--error-color);
+      color: var(--error-color);
+      box-shadow: 0 5px 20px rgba(255, 71, 87, 0.3);
+    }
+
+    .message.warning {
+      background: rgba(255, 165, 2, 0.2);
+      border: 1px solid var(--warning-color);
+      color: var(--warning-color);
+      box-shadow: 0 5px 20px rgba(255, 165, 2, 0.3);
+    }
+
+    .message.info {
+      background: rgba(52, 152, 219, 0.2);
+      border: 1px solid #3498db;
+      color: #3498db;
+      box-shadow: 0 5px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    /* Enhanced scroll animations */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .scroll-reveal.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Enhanced responsive design */
+    @media (max-width: 1024px) {
+      .prediction-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      
+      .hero-section::before {
+        animation-duration: 40s;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .weather-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      
+      .prediction-form,
+      .results-section {
+        padding: 30px 20px;
+      }
+      
+      .header-content {
+        padding: 0 15px;
+      }
+      
+      .back-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+
+      .yield-value {
+        font-size: 2.5rem;
+      }
+      
+      .particle {
+        animation-duration: 8s;
+      }
+      
+      .logo {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Fix for select option colors */
+    option {
+      color: #000;
+      background: #fff;
+    }
+
+    /* Additional micro-animations */
+    .form-group:hover label {
+      color: var(--primary-green);
+      transform: translateX(5px);
+    }
+
+    .weather-item .value {
+      transition: all 0.3s ease;
+    }
+
+    .weather-item:hover .value {
+      transform: scale(1.1);
+      color: var(--secondary-green);
+    }
+
+    /* Loading text animation */
+    .loading p {
+      animation: loadingText 2s ease-in-out infinite;
+    }
+
+    @keyframes loadingText {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    /* Success state animations */
+    .form-submitted .prediction-form {
+      border-color: var(--success-color);
+      box-shadow: 0 0 30px rgba(46, 213, 115, 0.3);
+    }
+
+    .form-submitted .predict-btn {
+      background: linear-gradient(135deg, var(--success-color), #27ae60);
+      animation: successPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes successPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Enhanced animated background particles -->
+  <div class="particles" id="particles"></div>
+
+  <header id="header">
+    <div class="header-content">
+      <a href="#" class="logo">AgroScan</a>
+      <a href="/index.html" class="back-btn" onclick="goBack()">
+        ← Back to Home
+      </a>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <section class="hero-section">
+      <h1>Crop Yield Prediction</h1>
+      <p>Get accurate crop yield predictions using AI-powered analysis of your agricultural data, weather conditions, and soil parameters.</p>
+    </section>
+
+    <div class="prediction-container">
+      <div class="prediction-form">
+        <h2>Input Your Crop Data</h2>
+        <div id="messageContainer"></div>
+        
+        <form id="predictionForm">
+          <div class="form-section">
+            <h3>🌾 Crop Information</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cropType" class="required">Crop Type</label>
+                <select id="cropType" name="cropType" required>
+                  <option value="">Select crop type</option>
+                  <option value="wheat">Wheat</option>
+                  <option value="rice">Rice</option>
+                  <option value="maize">Maize/Corn</option>
+                  <option value="cotton">Cotton</option>
+                  <option value="sugarcane">Sugarcane</option>
+                  <option value="soybean">Soybean</option>
+                  <option value="tomato">Tomato</option>
+                  <option value="potato">Potato</option>
+                  <option value="onion">Onion</option>
+                  <option value="barley">Barley</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="landArea" class="required">Land Area</label>
+                <input type="number" id="landArea" name="landArea" required min="0.1" step="0.1" placeholder="e.g., 2.5">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="areaUnit">Area Unit</label>
+                <select id="areaUnit" name="areaUnit">
+                  <option value="hectares">Hectares</option>
+                  <option value="acres">Acres</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="plantingDate" class="required">Planting Date</label>
+                <input type="date" id="plantingDate" name="plantingDate" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>🌍 Soil & Environment</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="soilType" class="required">Soil Type</label>
+                <select id="soilType" name="soilType" required>
+                  <option value="">Select soil type</option>
+                  <option value="loamy">Loamy</option>
+                  <option value="clay">Clay</option>
+                  <option value="sandy">Sandy</option>
+                  <option value="silt">Silt</option>
+                  <option value="peaty">Peaty</option>
+                  <option value="chalky">Chalky</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="irrigationType" class="required">Irrigation Type</label>
+                <select id="irrigationType" name="irrigationType" required>
+                  <option value="">Select irrigation method</option>
+                  <option value="drip">Drip Irrigation</option>
+                  <option value="sprinkler">Sprinkler</option>
+                  <option value="flood">Flood/Basin</option>
+                  <option value="manual">Manual/Traditional</option>
+                  <option value="rainfed">Rain-fed</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fertilizerType">Fertilizer Used</label>
+              <input type="text" id="fertilizerType" name="fertilizerType" placeholder="e.g., NPK 10-26-26, 50kg/hectare">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>📍 Location & Weather</h3>
+            <div class="form-group">
+              <label for="location" class="required">Location</label>
+              <input type="text" id="location" name="location" required placeholder="Enter city, state/region">
+              <div class="location-controls">
+                <button type="button" class="gps-btn" onclick="getGPSLocation()">📍 Use GPS</button>
+                <button type="button" class="gps-btn" onclick="fetchWeatherData()">🌤️ Get Weather</button>
+              </div>
+            </div>
+            <div id="weatherInfo" class="weather-info" style="display: none;">
+              <h4 style="color: var(--primary-green); margin-bottom: 10px;">Current Weather Data</h4>
+              <div class="weather-grid">
+                <div class="weather-item">
+                  <div class="label">Temperature</div>
+                  <div class="value" id="temperature">--°C</div>
+                </div>
+                <div class="weather-item">
+                  <div class="label">Humidity</div>
+                  <div class="value" id="humidity">--%</div>
+                </div>
+                <div class="weather-item">
+                  <div class="label">Rainfall</div>
+                  <div class="value" id="rainfall">-- mm</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="predict-btn" id="predictBtn">
+            🔮 Predict Yield
+          </button>
+        </form>
+      </div>
+
+      <div class="results-section">
+        <h2>Prediction Results</h2>
+        
+        <div class="loading" id="loadingSection">
+          <div class="spinner"></div>
+          <p>Analyzing your data and generating predictions...</p>
+        </div>
+
+        <div id="resultsContent" class="hidden">
+          <div class="prediction-card">
+            <div class="yield-value" id="predictedYield">4.2</div>
+            <div class="yield-unit">tons per hectare</div>
+            <div class="confidence-range">
+              Confidence Range: <span id="confidenceRange">3.8 - 4.6 tons/hectare</span>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="yieldChart"></canvas>
+          </div>
+
+          <div class="suggestions-card">
+            <h3>💡 Yield Improvement Suggestions</h3>
+            <div id="suggestions">
+              <div class="suggestion-item">
+                <div class="suggestion-title">Optimize Fertilizer Application</div>
+                <div class="suggestion-desc">Consider split application of nitrogen fertilizer for better nutrient uptake.</div>
+              </div>
+              <div class="suggestion-item">
+                <div class="suggestion-title">Improve Irrigation Timing</div>
+                <div class="suggestion-desc">Switch to drip irrigation during critical growth stages to increase water efficiency.</div>
+              </div>
+              <div class="suggestion-item">
+                <div class="suggestion-title">Soil Health Management</div>
+                <div class="suggestion-desc">Add organic matter to improve soil structure and nutrient retention.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="noResults" style="text-align: center; padding: 40px; opacity: 0.7;">
+          <h3 style="color: var(--primary-green); margin-bottom: 15px;">🌱 Ready for Prediction</h3>
+          <p>Fill out the form on the left and click "Predict Yield" to get your crop yield estimation with personalized recommendations.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let yieldChart = null;
+
+    // Enhanced particle creation with different types
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 60;
+
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Add different particle types randomly
+        const rand = Math.random();
+        if (rand > 0.7) {
+          particle.classList.add('large');
+        } else if (rand > 0.5) {
+          particle.classList.add('pulse');
+        }
+        
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 6 + 's';
+        particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // Enhanced header scroll effect
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('header');
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+      
+      // Scroll reveal animations
+      const scrollElements = document.querySelectorAll('.scroll-reveal');
+      scrollElements.forEach(element => {
+        const elementTop = element.getBoundingClientRect().top;
+        const elementVisible = 150;
+        
+        if (elementTop < window.innerHeight - elementVisible) {
+          element.classList.add('revealed');
+        }
+      });
+    });
+
+    // Enhanced message function with animation
+    function showMessage(type, text) {
+      const messageContainer = document.getElementById('messageContainer');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}`;
+      messageDiv.textContent = text;
+      messageDiv.style.display = 'block';
+      
+      messageContainer.innerHTML = '';
+      messageContainer.appendChild(messageDiv);
+      
+      // Auto-hide with fade out animation
+      setTimeout(() => {
+        messageDiv.style.animation = 'fadeOut 0.5s ease-out forwards';
+        setTimeout(() => {
+          messageDiv.style.display = 'none';
+        }, 500);
+      }, 5000);
+    }
+
+    // Enhanced GPS location function with reverse geocoding
+    async function getGPSLocation() {
+      if (navigator.geolocation) {
+        showMessage('info', '📍 Getting your location...');
+        
+        try {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+
+          const { latitude, longitude } = position.coords;
+          
+          // Use OpenStreetMap's Nominatim service for reverse geocoding
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await response.json();
+          
+          // Extract city and state from the address
+          const address = data.address;
+          const city = address.city || address.town || address.village || address.suburb || '';
+          const state = address.state || '';
+          
+          const locationString = `${city}, ${state}`.trim();
+          document.getElementById('location').value = locationString;
+          
+          showMessage('success', '✅ Location detected successfully!');
+          
+          // Automatically fetch weather data for the detected location
+          fetchWeatherData();
+          
+        } catch (error) {
+          console.error('Error getting location:', error);
+          showMessage('error', '❌ Unable to get location. Please enter manually.');
+        }
+      } else {
+        showMessage('error', '❌ Geolocation is not supported by this browser.');
+      }
+    }
+
+    // Enhanced weather data fetching with animations
+    function fetchWeatherData() {
+      const location = document.getElementById('location').value;
+      if (!location) {
+        showMessage('warning', '⚠️ Please enter a location first.');
+        return;
+      }
+
+      showMessage('info', '🌤️ Fetching weather data...');
+      
+      const apiKey = 'ed87b3d6d4e27f9d1ad987b4d1643b8d'; // Replace with your OpenWeatherMap API key
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`;
+
+      // Make API call
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data.cod === 200) {
+            const weatherInfo = document.getElementById('weatherInfo');
+            weatherInfo.style.display = 'block';
+            weatherInfo.classList.add('show');
+            
+            // Extract weather data
+            const temp = data.main.temp;
+            const humidity = data.main.humidity;
+            
+            // Check for rainfall data (rain in the last hour or 3 hours)
+            const rainfall = data.rain ? data.rain['1h'] || data.rain['3h'] : 0; // If no rainfall data, set to 0
+            
+            // Animate weather values
+            animateValue('temperature', 0, temp, 1500, '°C');
+            animateValue('humidity', 0, humidity, 1500, '%');
+            animateValue('rainfall', 0, rainfall, 1500, ' mm');
+
+            showMessage('success', '✅ Weather data updated successfully!');
+          } else {
+            showMessage('error', '❌ Unable to fetch weather data. Please try again.');
+          }
+        })
+        .catch(error => {
+          showMessage('error', '❌ Error: ' + error.message);
+        });
+    }
+
+    // Animate number values
+    function animateValue(id, start, end, duration, suffix = '') {
+      const element = document.getElementById(id);
+      const startTime = performance.now();
+      
+      const animate = (currentTime) => {
+        const elapsedTime = currentTime - startTime;
+        const progress = Math.min(elapsedTime / duration, 1);
+        const currentValue = Math.floor(start + (end - start) * progress);
+        
+        element.textContent = currentValue + suffix;
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      
+      requestAnimationFrame(animate);
+    }
+
+    // Enhanced form submission with animations
+    document.getElementById('predictionForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Add form submitted class for animation
+      document.body.classList.add('form-submitted');
+      
+      const loadingSection = document.getElementById('loadingSection');
+      const resultsContent = document.getElementById('resultsContent');
+      const noResults = document.getElementById('noResults');
+      const predictBtn = document.getElementById('predictBtn');
+      
+      // Disable button and show loading
+      predictBtn.disabled = true;
+      predictBtn.textContent = '🔄 Analyzing...';
+      loadingSection.classList.add('active');
+      resultsContent.classList.add('hidden');
+      noResults.style.display = 'none';
+      
+      // Simulate prediction with enhanced animations
+      setTimeout(() => {
+        loadingSection.classList.remove('active');
+        resultsContent.classList.remove('hidden');
+        
+        // Generate random prediction with animation
+        const yield1 = (Math.random() * 3 + 2).toFixed(1);
+        const confidence1 = (parseFloat(yield1) - 0.4).toFixed(1);
+        const confidence2 = (parseFloat(yield1) + 0.4).toFixed(1);
+        
+        // Animate yield value
+        animateValue('predictedYield', 0, parseFloat(yield1), 2000);
+        
+        document.getElementById('confidenceRange').textContent = 
+          `${confidence1} - ${confidence2} tons/hectare`;
+        
+        // Create enhanced chart
+        createYieldChart();
+        
+        // Generate personalized suggestions
+        generateSuggestions();
+        
+        // Re-enable button
+        predictBtn.disabled = false;
+        predictBtn.textContent = '🔮 Predict Yield';
+        
+        showMessage('success', '🎉 Prediction completed successfully!');
+        
+        // Remove form submitted class
+        setTimeout(() => {
+          document.body.classList.remove('form-submitted');
+        }, 3000);
+        
+      }, 4000);
+    });
+
+    // Enhanced chart creation with animations
+    function createYieldChart() {
+      const ctx = document.getElementById('yieldChart').getContext('2d');
+      
+      if (yieldChart) {
+        yieldChart.destroy();
+      }
+      
+      const data = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+          label: 'Predicted Yield (tons/hectare)',
+          data: [2.1, 2.8, 3.2, 3.8, 4.2, 4.5],
+          borderColor: '#00c851',
+          backgroundColor: 'rgba(0, 200, 81, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#00c851',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8
+        }]
+      };
+      
+      yieldChart = new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: {
+                color: '#ffffff'
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: '#ffffff'
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            },
+            y: {
+              ticks: {
+                color: '#ffffff'
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              }
+            }
+          },
+          animation: {
+            duration: 2000,
+            easing: 'easeInOutCubic'
+          }
+        }
+      });
+    }
+
+    // Generate personalized suggestions based on form data
+    function generateSuggestions() {
+      const cropType = document.getElementById('cropType').value;
+      const soilType = document.getElementById('soilType').value;
+      const irrigationType = document.getElementById('irrigationType').value;
+      
+      const suggestions = [
+        {
+          title: `Optimize ${cropType} Fertilizer Application`,
+          desc: `Consider split application of nitrogen fertilizer for better ${cropType} nutrient uptake.`
+        },
+        {
+          title: `Improve ${irrigationType} Efficiency`,
+          desc: `Switch to drip irrigation during critical growth stages to increase water efficiency for ${soilType} soil.`
+        },
+        {
+          title: `${soilType} Soil Health Management`,
+          desc: `Add organic matter to improve ${soilType} soil structure and nutrient retention.`
+        }
+      ];
+      
+      const suggestionsContainer = document.getElementById('suggestions');
+      suggestionsContainer.innerHTML = '';
+      
+      suggestions.forEach((suggestion, index) => {
+        const suggestionDiv = document.createElement('div');
+        suggestionDiv.className = 'suggestion-item';
+        suggestionDiv.style.animationDelay = `${4.2 + index * 0.2}s`;
+        suggestionDiv.innerHTML = `
+          <div class="suggestion-title">${suggestion.title}</div>
+          <div class="suggestion-desc">${suggestion.desc}</div>
+        `;
+        suggestionsContainer.appendChild(suggestionDiv);
+      });
+    }
+
+    // Back button function
+    function goBack() {
+      window.history.back();
+    }
+
+    // Initialize particles on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      createParticles();
+      
+      // Set default planting date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('plantingDate').value = today;
+      
+      // Add scroll reveal class to elements
+      const elementsToReveal = document.querySelectorAll('.form-section, .prediction-card, .chart-container, .suggestions-card');
+      elementsToReveal.forEach(element => {
+        element.classList.add('scroll-reveal');
+      });
+    });
+
+    // Enhanced form interactions
+    document.querySelectorAll('input, select, textarea').forEach(input => {
+      input.addEventListener('focus', function() {
+        this.parentElement.style.transform = 'scale(1.02)';
+        this.parentElement.style.zIndex = '10';
+      });
+      
+      input.addEventListener('blur', function() {
+        this.parentElement.style.transform = 'scale(1)';
+        this.parentElement.style.zIndex = '1';
+      });
+    });
+
+    // Add fade out animation keyframe
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeOut {
+        from { opacity: 1; transform: scale(1); }
+        to { opacity: 0; transform: scale(0.95); }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

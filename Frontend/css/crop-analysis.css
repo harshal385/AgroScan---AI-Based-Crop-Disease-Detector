@@ -1,0 +1,157 @@
+/**
+ * Crop Analysis CSS
+ * Styles for the crop disease analysis page
+ */
+
+/* Results section */
+.results-section {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 40px;
+  margin-top: 40px;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.results-section h2 {
+  text-align: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2rem;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, var(--text-light), var(--primary-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Analysis summary */
+.analysis-summary {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.result-card {
+  background: rgba(0, 200, 81, 0.1);
+  border: 1px solid rgba(0, 200, 81, 0.3);
+  border-radius: 16px;
+  padding: 25px;
+  text-align: center;
+  min-width: 300px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.result-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 200, 81, 0.2);
+}
+
+.result-card h3 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: var(--primary-green);
+}
+
+.confidence-badge {
+  display: inline-block;
+  background: var(--primary-green);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  box-shadow: 0 5px 15px rgba(0, 200, 81, 0.3);
+}
+
+/* Disease details */
+.disease-details, 
+.treatment-recommendations, 
+.prevention-tips {
+  margin-bottom: 30px;
+}
+
+.disease-details h3,
+.treatment-recommendations h3,
+.prevention-tips h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: var(--text-light);
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 10px;
+}
+
+.detail-section, 
+.treatment-section {
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.detail-section:hover,
+.treatment-section:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.detail-section h3, 
+.treatment-section h4 {
+  color: var(--primary-green);
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+/* Lists */
+.treatment-section ul,
+.prevention-tips ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.treatment-section li,
+.prevention-tips li {
+  position: relative;
+  padding-left: 25px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.treatment-section li:before,
+.prevention-tips li:before {
+  content: '✓';
+  color: var(--primary-green);
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: bold;
+}
+
+/* Powered by */
+.powered-by {
+  text-align: center;
+  opacity: 0.7;
+  font-size: 0.9rem;
+  margin-top: 30px;
+}
+
+.powered-by p {
+  display: inline-block;
+  padding: 8px 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .results-section {
+    padding: 25px;
+  }
+  
+  .result-card {
+    min-width: auto;
+    width: 100%;
+  }
+}

@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroScan Marketplace - Buy & Sell Agricultural Products</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/chatbot.css">
+  <script src="../js/chatbot.js" defer></script>
+  <style>
+    :root {
+      --primary-green: #00c851;
+      --secondary-green: #00ff41;
+      --dark-green: #00a142;
+      --accent-orange: #ff6b35;
+      --bg-dark: #0a0f0a;
+      --bg-light: #f8fff8;
+      --text-light: #ffffff;
+      --text-dark: #1a1a1a;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(10, 15, 10, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 15px 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      cursor: pointer;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .nav-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-light);
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .nav-btn:hover {
+      background: var(--primary-green);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn.active {
+      background: var(--primary-green);
+    }
+
+    /* Main container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 100px 20px 40px;
+    }
+
+    /* Title section */
+    .title-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .title-section h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, var(--text-light), var(--primary-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .title-section p {
+      font-size: 1.1rem;
+      opacity: 0.8;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Marketplace controls */
+    .marketplace-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .filter-section {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .filter-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-light);
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--primary-green);
+      border-color: var(--primary-green);
+    }
+
+    .search-box {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-light);
+      padding: 10px 15px;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      width: 250px;
+      outline: none;
+    }
+
+    .search-box::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .add-product-btn {
+      background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+      border: none;
+      padding: 12px 24px;
+      color: var(--text-light);
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 200, 81, 0.3);
+    }
+
+    .add-product-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 200, 81, 0.4);
+    }
+
+    /* Product grid */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .product-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(0, 200, 81, 0.2);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(45deg, var(--primary-green), var(--dark-green));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-image::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .product-info {
+      padding: 20px;
+    }
+
+    .product-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--primary-green);
+    }
+
+    .product-seller {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 10px;
+    }
+
+    .product-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-orange);
+      margin-bottom: 10px;
+    }
+
+    .product-location {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-bottom: 15px;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .buy-btn {
+      background: var(--primary-green);
+      color: white;
+    }
+
+    .contact-btn {
+      background: var(--glass-bg);
+      color: var(--text-light);
+      border: 1px solid var(--glass-border);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .buy-btn:hover {
+      box-shadow: 0 5px 15px rgba(0, 200, 81, 0.4);
+    }
+
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--bg-dark);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-green);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+    }
+
+    .close-btn:hover {
+      background: var(--glass-bg);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--primary-green);
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px 15px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary-green);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      height: 80px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+      border: none;
+      padding: 15px;
+      color: var(--text-light);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 200, 81, 0.4);
+    }
+
+    /* Success message */
+    .success-message {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--primary-green);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      z-index: 3000;
+    }
+
+    .success-message.show {
+      transform: translateX(0);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .marketplace-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-section {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+      .products-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header-nav {
+        display: none;
+      }
+    }
+
+    /* Chatbot styles (backup in case external CSS fails to load) */
+    #chatbot {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      font-family: 'Inter', sans-serif;
+    }
+
+    #chatbotButton {
+      background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+      color: var(--text-light);
+      border: none;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 28px;
+      box-shadow: 0 4px 20px rgba(0, 200, 81, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 4px 20px rgba(0, 200, 81, 0.4);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 4px 25px rgba(0, 200, 81, 0.6);
+        transform: scale(1.05);
+      }
+      100% {
+        box-shadow: 0 4px 20px rgba(0, 200, 81, 0.4);
+        transform: scale(1);
+      }
+    }
+
+    #chatbotButton:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 30px rgba(0, 200, 81, 0.6);
+    }
+
+    #chatWindow {
+      position: absolute;
+      bottom: 85px;
+      right: 0;
+      width: 380px;
+      height: 600px;
+      background: linear-gradient(145deg, rgba(10, 15, 10, 0.95), rgba(15, 25, 15, 0.98));
+      border: 1px solid rgba(0, 200, 81, 0.2);
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-origin: bottom right;
+      overflow: hidden;
+    }
+
+    #chatWindow::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      background: radial-gradient(circle at top right, rgba(0, 200, 81, 0.1), transparent 60%),
+                  radial-gradient(circle at bottom left, rgba(0, 255, 65, 0.05), transparent 60%);
+      pointer-events: none;
+    }
+
+    #chatWindow.hidden {
+      transform: scale(0.95) translateY(20px);
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    #chatHeader {
+      padding: 20px 25px;
+      background: linear-gradient(to right, rgba(0, 200, 81, 0.1), rgba(0, 200, 81, 0.05));
+      border-bottom: 1px solid rgba(0, 200, 81, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 24px 24px 0 0;
+    }
+
+    #chatHeader span {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, #fff, #a0ffc2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #chatHeader span::before {
+      content: '🌱';
+      font-size: 1.4rem;
+    }
+
+    #closeChat {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text-light);
+      font-size: 18px;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    #closeChat:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(90deg);
+    }
+
+    #chatContent {
+      flex: 1;
+      overflow-y: auto;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+      position: relative;
+    }
+
+    #chatContent::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #chatContent::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #chatContent::-webkit-scrollbar-thumb {
+      background: rgba(0, 200, 81, 0.2);
+      border-radius: 10px;
+    }
+
+    #chatContent::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 200, 81, 0.3);
+    }
+
+    .user-message, .bot-message {
+      max-width: 85%;
+      padding: 14px 18px;
+      border-radius: 18px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      position: relative;
+      animation: messageAppear 0.3s ease-out;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-message {
+      background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+      color: white;
+      margin-left: auto;
+      border-radius: 18px 18px 0 18px;
+    }
+
+    .bot-message {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-right: auto;
+      border-radius: 18px 18px 18px 0;
+      color: #e6e6e6;
+    }
+
+    .bot-message::before {
+      content: '🌿';
+      position: absolute;
+      top: -20px;
+      left: 0;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    @keyframes messageAppear {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    #chatInputArea {
+      padding: 20px 25px;
+      background: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      position: relative;
+    }
+
+    #chatInputArea::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(0, 200, 81, 0.2), transparent);
+    }
+
+    #chatInput {
+      width: 100%;
+      padding: 14px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 25px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-light);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    #chatInput:focus {
+      border-color: var(--primary-green);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(0, 200, 81, 0.1);
+    }
+
+    #chatInput::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    #sendMessage {
+      background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+      color: white;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 200, 81, 0.2);
+    }
+
+    #sendMessage::after {
+      content: '→';
+      margin-left: 8px;
+      font-size: 1.2em;
+      transition: transform 0.3s ease;
+    }
+
+    #sendMessage:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 200, 81, 0.3);
+    }
+
+    #sendMessage:hover::after {
+      transform: translateX(3px);
+    }
+
+    #sendMessage:active {
+      transform: translateY(1px);
+    }
+
+    #typingIndicator {
+      position: absolute;
+      bottom: 90px;
+      left: 25px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 8px 16px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      color: var(--text-light);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #typingIndicator::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--primary-green);
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+
+    #typingIndicator.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo" onclick="window.location.href='../index.html'">AgroScan</div>
+      <div class="header-nav">
+        <a href="/index.html" class="nav-btn">Home</a>
+        <a href="#" class="nav-btn active">Marketplace</a>
+        <a href="/Frontend/pages/contact-us.html" class="nav-btn">Contact Us</a>
+        <a href="/Frontend/pages/about_us.html" class="nav-btn">About Us</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="title-section">
+      <h1>🛒 Agricultural Marketplace</h1>
+      <p>Connect directly with farmers and buyers. Trade fresh produce, seeds, equipment, and more in a secure environment.</p>
+    </div>
+
+    <div class="marketplace-controls">
+      <div class="filter-section">
+        <button class="filter-btn active" onclick="filterProducts('all')">All Products</button>
+        <button class="filter-btn" onclick="filterProducts('crops')">🌾 Crops</button>
+        <button class="filter-btn" onclick="filterProducts('seeds')">🌱 Seeds</button>
+        <button class="filter-btn" onclick="filterProducts('equipment')">🚜 Equipment</button>
+        <button class="filter-btn" onclick="filterProducts('fertilizers')">🧂 Fertilizers</button>
+      </div>
+      <input type="text" class="search-box" placeholder="Search products..." onkeyup="searchProducts(this.value)">
+      <button class="add-product-btn" onclick="openAddProductModal()">+ Add Product</button>
+    </div>
+
+    <div class="products-grid" id="productsGrid">
+      <!-- Products will be dynamically loaded here -->
+    </div>
+  </div>
+
+  <!-- Add Product Modal -->
+  <div class="modal" id="addProductModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Add New Product</h2>
+        <button class="close-btn" onclick="closeModal('addProductModal')">&times;</button>
+      </div>
+      <form onsubmit="addProduct(event)">
+  <div class="form-group">
+    <label class="form-label">Product Name</label>
+    <input type="text" class="form-input" name="productName" required>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Category</label>
+    <select class="form-select" name="category" required>
+      <option value="">Select Category</option>
+      <option value="crops">🌾 Crops</option>
+      <option value="seeds">🌱 Seeds</option>
+      <option value="equipment">🚜 Equipment</option>
+      <option value="fertilizers">🧂 Fertilizers</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Price (₹)</label>
+    <input type="number" class="form-input" name="price" min="0" step="0.01" required>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Seller Name</label>
+    <input type="text" class="form-input" name="sellerName" required>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Location</label>
+    <input type="text" class="form-input" name="location" required>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Contact Number</label>
+    <input type="tel" class="form-input" name="contact" required>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Description</label>
+    <textarea class="form-textarea" name="description" placeholder="Describe your product..."></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">External Buy URL</label>
+    <input type="url" class="form-input" name="buyUrl" placeholder="https://example.com/product" required>
+  </div>
+  <button type="submit" class="submit-btn">Add Product</button>
+</form>
+    </div>
+  </div>
+
+  <!-- Contact Modal -->
+  <div class="modal" id="contactModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Contact Seller</h2>
+        <button class="close-btn" onclick="closeModal('contactModal')">&times;</button>
+      </div>
+      <div id="contactInfo">
+        <!-- Contact information will be displayed here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  <div class="success-message" id="successMessage">
+    Product added successfully!
+  </div>
+
+  <!-- Chatbot -->
+  <div id="chatbot">
+    <button id="chatbotButton">🤖</button>
+    <div id="chatWindow" class="hidden">
+      <div id="chatHeader">
+        <span>AgroScan Support</span>
+        <button id="closeChat">×</button>
+      </div>
+      <div id="chatContent">
+        <div class="bot-message">Hello! I'm your AgroScan marketplace assistant. I can help you find products, connect with sellers, or list your own items. How can I assist you today? 🌱</div>
+      </div>
+      <div id="chatInputArea">
+        <input type="text" id="chatInput" placeholder="Type your message here..." />
+        <button id="sendMessage">Send</button>
+        <div id="typingIndicator" class="hidden">AI is thinking...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sample product data
+    let products = [
+      {
+        id: 1,
+        name: "Fresh Organic Tomatoes",
+        category: "crops",
+        price: 45,
+        seller: "Ramesh Patil",
+        location: "Pune, Maharashtra",
+        contact: "+91 98765 43210",
+        description: "Fresh organic tomatoes grown without pesticides. Perfect for cooking and salads.",
+        icon: "🍅",
+        buyUrl: "https://www.indiamart.com/proddetail/fresh-organic-tomato-2855644415948.html"
+      },
+      {
+        id: 2,
+        name: "Wheat Seeds (HD-2967)",
+        category: "seeds",
+        price: 2500,
+        seller: "Suresh Kumar",
+        location: "Nashik, Maharashtra",
+        contact: "+91 87654 32109",
+        description: "High yielding wheat variety suitable for irrigated conditions.",
+        icon: "🌾",
+        buyUrl: "https://shop.gramik.in/search?subsubcategory=Wheat-qv9qL&srsltid=AfmBOooWjncwDFzdquwCql-4xX4eFft2tpy0gM0NM9wGWbMhpY-clRUz"
+      },
+      {
+        id: 3,
+        name: "Organic Fertilizer",
+        category: "fertilizers",
+        price: 800,
+        seller: "Green Valley Co-op",
+        location: "Kolhapur, Maharashtra",
+        contact: "+91 76543 21098",
+        description: "100% organic fertilizer made from cow dung and kitchen waste.",
+        icon: "🧂",
+        buyUrl: "https://www.iffco.in/en/organic-and-bio-fertilisers"
+      },
+      {
+        id: 4,
+        name: "Small Tractor (Used)",
+        category: "equipment",
+        price: 285000,
+        seller: "Mahesh Jadhav",
+        location: "Satara, Maharashtra",
+        contact: "+91 65432 10987",
+        description: "Well-maintained tractor, 5 years old. All papers clear.",
+        icon: "🚜",
+        buyUrl: "https://www.tractortransport.com/"
+      },
+      {
+        id: 5,
+        name: "Fresh Onions",
+        category: "crops",
+        price: 35,
+        seller: "Prakash Shinde",
+        location: "Solapur, Maharashtra",
+        contact: "+91 54321 09876",
+        description: "Premium quality onions, perfect for wholesale buyers.",
+        icon: "🧅",
+        buyUrl: "https://countrydelight.in/products/fresh-vegetables/onion-local-450-gm"
+      },
+      {
+        id: 6,
+        name: "Cotton Seeds",
+        category: "seeds",
+        price: 3200,
+        seller: "Anita Deshmukh",
+        location: "Aurangabad, Maharashtra",
+        contact: "+91 43210 98765",
+        description: "Bt cotton seeds with high fiber quality and disease resistance.",
+        icon: "🌱",
+        buyUrl: "https://www.crystalcropprotection.com/seed/category/cotton"
+      }
+    ];
+
+    let filteredProducts = [...products];
+
+    // Initialize the marketplace
+    function initializeMarketplace() {
+      displayProducts(products);
+    }
+
+    // Display products
+    function displayProducts(productsToShow) {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = '';
+
+      if (productsToShow.length === 0) {
+        grid.innerHTML = '<div style="text-align: center; grid-column: 1/-1; opacity: 0.7; padding: 40px;">No products found matching your criteria.</div>';
+        return;
+      }
+
+      // ...inside displayProducts function...
+productsToShow.forEach(product => {
+  const productCard = document.createElement('div');
+  productCard.className = 'product-card';
+  productCard.innerHTML = `
+    <div class="product-image">
+      ${product.icon}
+    </div>
+    <div class="product-info">
+      <div class="product-title">${product.name}</div>
+      <div class="product-seller">Seller: ${product.seller}</div>
+      <div class="product-location">📍 ${product.location}</div>
+      <div class="product-actions">
+        <button class="action-btn buy-btn" onclick="buyProduct(${product.id})">Visit Website</button>
+        <button class="action-btn contact-btn" onclick="contactSeller(${product.id})">Contact</button>
+      </div>
+    </div>
+  `;
+  grid.appendChild(productCard);
+});
+    }
+
+    // Filter products by category
+    function filterProducts(category) {
+      // Update active filter button
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (category === 'all') {
+        filteredProducts = [...products];
+      } else {
+        filteredProducts = products.filter(product => product.category === category);
+      }
+      displayProducts(filteredProducts);
+    }
+
+    // Search products
+    function searchProducts(query) {
+      const searchTerm = query.toLowerCase();
+      const searchResults = products.filter(product => 
+        product.name.toLowerCase().includes(searchTerm) ||
+        product.seller.toLowerCase().includes(searchTerm) ||
+        product.location.toLowerCase().includes(searchTerm) ||
+        product.description.toLowerCase().includes(searchTerm)
+      );
+      displayProducts(searchResults);
+    }
+
+    // Open add product modal
+    function openAddProductModal() {
+      document.getElementById('addProductModal').classList.add('active');
+    }
+
+    // Close modal
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Add new product
+    function addProduct(event) {
+  event.preventDefault();
+  const formData = new FormData(event.target);
+  
+  const categoryIcons = {
+    crops: '🌾',
+    seeds: '🌱',
+    equipment: '🚜',
+    fertilizers: '🧂'
+  };
+
+  const newProduct = {
+    id: products.length + 1,
+    name: formData.get('productName'),
+    category: formData.get('category'),
+    price: parseFloat(formData.get('price')),
+    seller: formData.get('sellerName'),
+    location: formData.get('location'),
+    contact: formData.get('contact'),
+    description: formData.get('description'),
+    icon: categoryIcons[formData.get('category')] || '📦',
+    buyUrl: formData.get('buyUrl')
+  };
+
+  products.push(newProduct);
+  displayProducts(products);
+  closeModal('addProductModal');
+  showSuccessMessage('Product added successfully!');
+  event.target.reset();
+}
+
+    // Buy product
+    function buyProduct(productId) {
+  const product = products.find(p => p.id === productId);
+  if (product && product.buyUrl) {
+    window.open(product.buyUrl, '_blank');
+  } else {
+    alert('No external buy URL provided for this product.');
+  }
+}
+
+    // Contact seller
+    function contactSeller(productId) {
+      const product = products.find(p => p.id === productId);
+      if (product) {
+        const contactInfo = document.getElementById('contactInfo');
+        contactInfo.innerHTML = `
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">${product.icon}</div>
+            <h3 style="color: var(--primary-green); margin-bottom: 10px;">${product.name}</h3>
+          </div>
+          <div style="background: var(--glass-bg); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+            <p><strong>Seller:</strong> ${product.seller}</p>
+            <p><strong>Contact:</strong> ${product.contact}</p>
+            <p><strong>Location:</strong> ${product.location}</p>
+            <p><strong>Price:</strong> ₹${product.price.toLocaleString()}</p>
+          </div>
+          <div style="background: var(--glass-bg); padding: 15px; border-radius: 15px;">
+            <p><strong>Description:</strong></p>
+            <p style="opacity: 0.8; margin-top: 5px;">${product.description}</p>
+          </div>
+          <div style="margin-top: 20px; text-align: center;">
+            <a href="tel:${product.contact}" style="display: inline-block; background: var(--primary-green); color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600; margin-right: 10px;">📞 Call Now</a>
+            <a href="sms:${product.contact}" style="display: inline-block; background: var(--glass-bg); color: var(--text-light); padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600; border: 1px solid var(--glass-border);">💬 SMS</a>
+          </div>
+        `;
+        document.getElementById('contactModal').classList.add('active');
+      }
+    }
+
+    // Show success message
+    function showSuccessMessage(message) {
+      const successMsg = document.getElementById('successMessage');
+      successMsg.textContent = message;
+      successMsg.classList.add('show');
+      setTimeout(() => {
+        successMsg.classList.remove('show');
+      }, 3000);
+    }
+
+    // Go to home
+    function goToHome() {
+      window.location.href = '../index.html';
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        if (event.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeMarketplace();
+      
+      // Initialize chatbot
+      const chatbot = new ChatBot();
+      chatbot.setupEventListeners();
+      window.chatbot = chatbot;
+    });
+
+    // Chatbot class (backup in case external JS fails to load)
+    class ChatBot {
+      constructor() {
+        this.apiKey = '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';
+        this.messageHistory = [];
+        this.isProcessing = false;
+      }
+
+      setupEventListeners() {
+        const chatbotButton = document.getElementById('chatbotButton');
+        const closeChat = document.getElementById('closeChat');
+        const sendMessage = document.getElementById('sendMessage');
+        const chatInput = document.getElementById('chatInput');
+
+        chatbotButton.onclick = () => {
+          const chatWindow = document.getElementById('chatWindow');
+          chatWindow.classList.toggle('hidden');
+        };
+
+        closeChat.onclick = () => {
+          const chatWindow = document.getElementById('chatWindow');
+          chatWindow.classList.add('hidden');
+        };
+
+        sendMessage.onclick = () => this.handleSendMessage();
+
+        chatInput.onkeypress = (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            this.handleSendMessage();
+          }
+        };
+      }
+
+      async handleSendMessage() {
+        if (this.isProcessing) return;
+
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+        const typingIndicator = document.getElementById('typingIndicator');
+        
+        if (message === '') return;
+
+        this.addMessageToChat('user', message);
+        chatInput.value = '';
+
+        this.isProcessing = true;
+        typingIndicator.classList.remove('hidden');
+        typingIndicator.classList.add('visible');
+
+        try {
+          const response = await this.getAIResponse(message);
+          this.addMessageToChat('bot', response);
+        } catch (error) {
+          console.error('Error getting AI response:', error);
+          this.addMessageToChat('bot', 'I apologize, but I encountered an error. Please try again.');
+        }
+
+        typingIndicator.classList.remove('visible');
+        setTimeout(() => {
+          typingIndicator.classList.add('hidden');
+        }, 300);
+        this.isProcessing = false;
+      }
+
+      addMessageToChat(sender, message) {
+        const chatContent = document.getElementById('chatContent');
+        const messageElement = document.createElement('div');
+        messageElement.textContent = message;
+        messageElement.className = sender === 'user' ? 'user-message' : 'bot-message';
+        chatContent.appendChild(messageElement);
+        chatContent.scrollTop = chatContent.scrollHeight;
+
+        this.messageHistory.push({
+          role: sender === 'user' ? 'user' : 'assistant',
+          content: message
+        });
+      }
+
+      async getAIResponse(message) {
+        try {
+          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${this.apiKey}`,
+              'HTTP-Referer': window.location.href,
+              'X-Title': 'AgroScan Marketplace'
+            },
+            body: JSON.stringify({
+              model: 'mistralai/mistral-7b-instruct',
+              messages: [
+                {
+                  role: 'system',
+                  content: 'You are an AI marketplace assistant for AgroScan, focused on helping users find agricultural products, connect with sellers, and list their own items. You can help with product searches, pricing information, and marketplace navigation. Be friendly, professional, and knowledgeable about agricultural products and market trends.'
+                },
+                ...this.messageHistory,
+                {
+                  role: 'user',
+                  content: message
+                }
+              ]
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to get AI response');
+          }
+
+          const data = await response.json();
+          return data.choices[0].message.content;
+        } catch (error) {
+          console.error('API Error:', error);
+          throw error;
+        }
+      }
+    }
+  </script>
+</body>
+</html>
